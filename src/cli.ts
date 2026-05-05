@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
 import { Command } from "commander";
 import { registerAdd } from "./commands/add.js";
 import { registerDelete } from "./commands/delete.js";
@@ -13,12 +14,13 @@ import { registerSync } from "./commands/sync.js";
 import { registerToday } from "./commands/today.js";
 import { registerWebhook } from "./commands/webhook.js";
 
+const pkg = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as { version: string };
 const program = new Command();
 
 program
   .name("memo")
   .description("Local-first Markdown memo CLI")
-  .version("0.1.0")
+  .version(pkg.version)
   .option("--data-dir <dir>", "override memo data directory");
 
 registerInit(program);

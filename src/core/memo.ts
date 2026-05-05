@@ -33,7 +33,6 @@ export function parseMemo(raw: string, filePath: string, relativePath: string): 
     created_at: String(data.created_at || ""),
     updated_at: String(data.updated_at || ""),
     tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-    visibility: String(data.visibility || "public"),
   };
   return { meta, content: parsed.content.trimEnd(), filePath, relativePath };
 }
@@ -64,7 +63,6 @@ export function newMemo(content: string, date = new Date()): { meta: MemoMetadat
       created_at: now,
       updated_at: now,
       tags: extractTags(content),
-      visibility: "public",
     },
   };
 }
@@ -81,6 +79,5 @@ export function validateRawMemo(record: MemoRecord, original: MemoMetadata): Mem
     created_at: original.created_at,
     updated_at: localIso(),
     tags: record.meta.tags.map(String),
-    visibility: record.meta.visibility || "public",
   };
 }

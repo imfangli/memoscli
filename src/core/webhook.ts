@@ -138,6 +138,6 @@ export async function createTestEvent(name: string): Promise<MemoWebhookEvent> {
     event: "webhook.test",
     occurred_at: localIso(),
     source: "momo-cli",
-    memo: { id: "test", content: `Webhook test for ${name}`, created_at: localIso(), updated_at: localIso(), tags: [], visibility: "public" },
+    memo: { id: "test", content: `Webhook test for ${name}`, created_at: localIso(), updated_at: localIso(), tags: [] },
   };
 }

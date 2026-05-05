@@ -17,7 +17,6 @@ function result(): SearchResult {
         created_at: "2026-05-05T15:11:28+08:00",
         updated_at: "2026-05-05T15:11:28+08:00",
         tags: ["work"],
-        visibility: "public",
       },
     },
     matches: [

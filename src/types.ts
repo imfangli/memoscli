@@ -1,11 +1,8 @@
-export type MemoVisibility = "public" | "private" | "protected";
-
 export interface MemoMetadata {
   id: string;
   created_at: string;
   updated_at: string;
   tags: string[];
-  visibility: MemoVisibility | string;
 }
 
 export interface MemoRecord {

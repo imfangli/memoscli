@@ -21,7 +21,6 @@ describe("memo core", () => {
         created_at: "2026-05-05T14:30:12+08:00",
         updated_at: "2026-05-05T14:30:12+08:00",
         tags: ["idea"],
-        visibility: "public",
       },
       "hello #idea",
     );
@@ -29,5 +28,24 @@ describe("memo core", () => {
     expect(memo.meta.id).toBe("20260505143012-a8f3");
     expect(memo.meta.tags).toEqual(["idea"]);
     expect(memo.content).toBe("hello #idea");
+    expect(raw).not.toContain("visibility");
+  });
+
+  it("reads old visibility front matter but drops it when serialized", () => {
+    const oldRaw = `---
+id: 20260505143012-a8f3
+created_at: 2026-05-05T14:30:12+08:00
+updated_at: 2026-05-05T14:30:12+08:00
+tags:
+  - idea
+visibility: public
+---
+
+hello #idea
+`;
+    const memo = parseMemo(oldRaw, "/tmp/memo.md", "memos/2026/05/05/143012-a8f3.md");
+    const nextRaw = serializeMemo(memo.meta, memo.content);
+    expect(memo.meta.id).toBe("20260505143012-a8f3");
+    expect(nextRaw).not.toContain("visibility");
   });
 });

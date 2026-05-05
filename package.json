@@ -22,6 +22,9 @@
     "local-first"
   ],
   "packageManager": "pnpm@10.33.3",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "bin": {
     "memo": "./dist/cli.js"
   },
@@ -34,6 +37,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/cli.ts",
     "prepack": "pnpm build",
+    "release:check": "node scripts/check-release-version.mjs",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

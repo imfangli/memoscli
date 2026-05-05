@@ -18,12 +18,12 @@ Local-first Markdown memo CLI backed by Git and webhooks.
 ## Requirements
 
 - Node.js 20+
-- pnpm
 - Git
 - A POSIX-like shell for background Git sync
 
 Optional:
 
+- pnpm for source development
 - `rg` for faster search
 - `fzf` for interactive selection
 - `nvim`, `vim`, `vi`, or `nano` if `$EDITOR` is not set
@@ -45,33 +45,20 @@ Not guaranteed in v0.1:
 
 Some features, especially background Git sync and command detection, currently depend on `sh`.
 
-## Install From Source
+## Install
 
 ```bash
-git clone https://github.com/imfangli/memoscli.git
-cd memoscli
-pnpm install
-pnpm build
-pnpm link --global
+npm i -g memoscli
 memo --help
 ```
 
-If `pnpm link --global` reports that the global bin directory is missing:
+The npm package is named `memoscli`; the installed command is `memo`.
+
+You can also try it without installing globally:
 
 ```bash
-pnpm setup
-source ~/.zshrc
-pnpm link --global
+npx memoscli --help
 ```
-
-Development mode:
-
-```bash
-pnpm dev -- --help
-pnpm dev -- init /tmp/memo-demo
-```
-
-NPM package publishing is not part of v0.1 yet.
 
 ## Quick Start
 
@@ -104,6 +91,32 @@ Manual Git sync:
 
 ```bash
 memo sy
+```
+
+## Install From Source
+
+```bash
+git clone https://github.com/imfangli/memoscli.git
+cd memoscli
+pnpm install
+pnpm build
+pnpm link --global
+memo --help
+```
+
+If `pnpm link --global` reports that the global bin directory is missing:
+
+```bash
+pnpm setup
+source ~/.zshrc
+pnpm link --global
+```
+
+Development mode:
+
+```bash
+pnpm dev -- --help
+pnpm dev -- init /tmp/memo-demo
 ```
 
 ## Data Model
@@ -305,6 +318,17 @@ Webhook aliases:
 
 ## Troubleshooting
 
+### `memo` is not found after npm install
+
+Check your global npm bin path:
+
+```bash
+npm bin -g
+npm config get prefix
+```
+
+Make sure the global bin directory is in your `PATH`.
+
 ### `pnpm link --global` cannot find global bin dir
 
 Run:
@@ -341,6 +365,20 @@ git -C ~/.momo status --short --branch
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Release And npm Publishing
+
+This package is published to npm from GitHub Releases via npm Trusted Publishing.
+
+Trusted publisher settings on npm:
+
+- Package: `memoscli`
+- Publisher: GitHub Actions
+- Owner: `imfangli`
+- Repository: `memoscli`
+- Workflow filename: `publish.yml`
+
+Release tags must match `package.json` exactly, for example `v0.1.0`.
 
 ## Security
 

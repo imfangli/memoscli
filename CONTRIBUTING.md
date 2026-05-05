@@ -27,6 +27,7 @@ pnpm test
 pnpm typecheck
 pnpm build
 pnpm audit --registry=https://registry.npmjs.org --audit-level moderate
+pnpm pack --dry-run
 ```
 
 ## Design Principles
@@ -46,3 +47,42 @@ The supported development targets are macOS, Linux, and Windows through WSL or G
 - Add focused tests for behavior changes.
 - Avoid committing generated `dist/` files unless the release process asks for them.
 - Do not commit local `config.toml`, webhook secrets, or memo data.
+
+## Release Process
+
+Releases are published to npm from GitHub Releases using npm Trusted Publishing.
+
+Before creating a release:
+
+```bash
+pnpm test
+pnpm typecheck
+pnpm build
+pnpm audit --registry=https://registry.npmjs.org --audit-level moderate
+pnpm pack --dry-run
+```
+
+Update the package version:
+
+```bash
+npm version patch
+git push origin main --follow-tags
+```
+
+Create a GitHub Release whose tag exactly matches the package version:
+
+```text
+v0.1.1
+```
+
+The publish workflow checks the tag against `package.json` and then runs tests, typecheck, build, pack dry-run, and `npm publish --access public`.
+
+Trusted publisher setup on npm:
+
+- Package: `memoscli`
+- Publisher: GitHub Actions
+- Owner: `imfangli`
+- Repository: `memoscli`
+- Workflow filename: `publish.yml`
+
+The workflow intentionally does not use `NPM_TOKEN`.

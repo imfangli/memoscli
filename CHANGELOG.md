@@ -2,6 +2,7 @@
 
 ## 0.1.0
 
+- First npm release.
 - Initial local-first memo CLI.
 - Markdown front matter memo storage.
 - Git commits for add/edit/delete.

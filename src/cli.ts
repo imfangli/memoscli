@@ -16,10 +16,10 @@ import { registerWebhook } from "./commands/webhook.js";
 const program = new Command();
 
 program
-  .name("momo")
+  .name("memo")
   .description("Local-first Markdown memo CLI")
   .version("0.1.0")
-  .option("--data-dir <dir>", "override momo data directory");
+  .option("--data-dir <dir>", "override memo data directory");
 
 registerInit(program);
 registerAdd(program);

@@ -8,7 +8,7 @@ export function registerInit(program: Command): void {
   program
     .command("init")
     .argument("[dir]", "data directory", "~/.momo")
-    .description("Initialize a momo data directory")
+    .description("Initialize a memo data directory")
     .action(async (dir: string) => {
       const dataDir = resolvePath(dir);
       await Promise.all([
@@ -20,6 +20,6 @@ export function registerInit(program: Command): void {
       ]);
       await createDefaultConfig(dataDir);
       await gitInit(dataDir);
-      console.log(`Initialized momo data directory: ${dataDir}`);
+      console.log(`Initialized memo data directory: ${dataDir}`);
     });
 }

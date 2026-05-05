@@ -9,7 +9,7 @@ import { localDateString } from "../utils/time.js";
 export function registerStatus(program: Command): void {
   program
     .command("status")
-    .description("Show momo status")
+    .description("Show memo status")
     .action(async (command: Command) => {
       const config = await commandConfig(command);
       const today = localDateString();

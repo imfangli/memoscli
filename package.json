@@ -4,7 +4,7 @@
   "description": "Local-first Markdown memo CLI backed by Git and webhooks.",
   "type": "module",
   "bin": {
-    "momo": "./dist/cli.js"
+    "memo": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

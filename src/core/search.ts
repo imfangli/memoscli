@@ -77,11 +77,18 @@ export async function searchMemos(dataDir: string, query: string, limit = 20): P
 
 export function formatSearchResult(
   result: SearchResult,
-  options: { showMatches?: boolean; showPath?: boolean } = {},
+  options: { query?: string; showMatches?: boolean; showPath?: boolean; color?: boolean } = {},
 ): string {
   const tags = result.memo.meta.tags.length ? `  #${result.memo.meta.tags.join(" #")}` : "";
   const pathText = options.showPath ? `  ${result.relativePath}` : "";
   const header = `${displayDateTime(result.memo.meta.created_at)}  ${result.memo.meta.id}${tags}${pathText}`;
   const matches = options.showMatches ? result.matches : result.matches.slice(0, 1);
-  return [header, ...matches.map((match) => summarize(match.text, 120))].join("\n");
+  return [header, ...matches.map((match) => highlightQuery(summarize(match.text, 120), options.query, options.color))].join("\n");
+}
+
+export function highlightQuery(text: string, query?: string, color = !process.env.NO_COLOR): string {
+  if (!query || !color) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (!escaped) return text;
+  return text.replace(new RegExp(escaped, "gi"), (match) => `\u001b[1;33m${match}\u001b[0m`);
 }

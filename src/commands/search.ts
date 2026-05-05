@@ -23,7 +23,7 @@ export function registerSearch(program: Command): void {
         const selected = await selectItem(
           results.map((result, index) => ({
             id: String(index),
-            label: formatSearchResult(result, { showMatches: false, showPath: Boolean(options.path) }).replace(/\n/g, "  "),
+            label: formatSearchResult(result, { query, showMatches: false, showPath: Boolean(options.path) }).replace(/\n/g, "  "),
           })),
         );
         const result = selected ? results[Number(selected.id)] : undefined;
@@ -32,7 +32,7 @@ export function registerSearch(program: Command): void {
       }
       results.forEach((result, index) => {
         if (index > 0) console.log("");
-        console.log(formatSearchResult(result, { showMatches: Boolean(options.matches), showPath: Boolean(options.path) }));
+        console.log(formatSearchResult(result, { query, showMatches: Boolean(options.matches), showPath: Boolean(options.path) }));
       });
     });
 }

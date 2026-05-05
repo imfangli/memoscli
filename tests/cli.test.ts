@@ -9,7 +9,13 @@ const tsx = path.join(root, "node_modules", ".bin", "tsx");
 const cli = path.join(root, "src", "cli.ts");
 
 function run(args: string[], cwd = root): string {
-  return execFileSync(tsx, [cli, ...args], { cwd, encoding: "utf8" });
+  const env = { ...process.env };
+  delete env.NO_COLOR;
+  return execFileSync(tsx, [cli, ...args], { cwd, encoding: "utf8", env });
+}
+
+function stripAnsi(text: string): string {
+  return text.replace(/\u001b\[[0-9;]*m/g, "");
 }
 
 describe("cli", () => {
@@ -48,17 +54,18 @@ describe("cli", () => {
     run(["--data-dir", dir, "add", "第一行翻译 #work\n第二行翻译"]);
 
     const output = run(["--data-dir", dir, "search", "翻译"]);
-    expect(output).toContain("#work");
-    expect(output).toContain("第一行翻译");
-    expect(output).not.toContain(dir);
+    expect(output).toContain("\u001b[1;33m翻译\u001b[0m");
+    expect(stripAnsi(output)).toContain("#work");
+    expect(stripAnsi(output)).toContain("第一行翻译");
+    expect(stripAnsi(output)).not.toContain(dir);
 
     const withPath = run(["--data-dir", dir, "search", "翻译", "--path"]);
-    expect(withPath).toContain("memos/");
-    expect(withPath).not.toContain(dir);
+    expect(stripAnsi(withPath)).toContain("memos/");
+    expect(stripAnsi(withPath)).not.toContain(dir);
 
     const withMatches = run(["--data-dir", dir, "search", "翻译", "--matches"]);
-    expect(withMatches).toContain("第一行翻译");
-    expect(withMatches).toContain("第二行翻译");
+    expect(stripAnsi(withMatches)).toContain("第一行翻译");
+    expect(stripAnsi(withMatches)).toContain("第二行翻译");
 
     expect(run(["--data-dir", dir, "search", "不存在的词"])).toContain("No memos found.");
   });

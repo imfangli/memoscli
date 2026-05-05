@@ -11,7 +11,7 @@ export async function selectItem(items: SelectItem[]): Promise<SelectItem | unde
   if (items.length === 0) return undefined;
   if (commandExists("fzf")) {
     const inputText = items.map((item) => `${item.id}\t${item.label}`).join("\n");
-    const result = await run("fzf", ["--with-nth=2..", "--delimiter=\t"], { input: inputText, allowFailure: true });
+    const result = await run("fzf", ["--ansi", "--with-nth=2..", "--delimiter=\t"], { input: inputText, allowFailure: true });
     const id = result.stdout.split("\t")[0]?.trim();
     return items.find((item) => item.id === id);
   }

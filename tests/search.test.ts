@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { formatSearchResult, SearchResult } from "../src/core/search.js";
+import { formatSearchResult, highlightQuery, SearchResult } from "../src/core/search.js";
+
+function stripAnsi(text: string): string {
+  return text.replace(/\u001b\[[0-9;]*m/g, "");
+}
 
 function result(): SearchResult {
   return {
@@ -25,7 +29,7 @@ function result(): SearchResult {
 
 describe("search formatting", () => {
   it("formats memo-friendly results without absolute paths by default", () => {
-    const output = formatSearchResult(result());
+    const output = stripAnsi(formatSearchResult(result()));
     expect(output).toContain("20260505151128-2253");
     expect(output).toContain("#work");
     expect(output).toContain("翻译一句话");
@@ -34,9 +38,15 @@ describe("search formatting", () => {
   });
 
   it("can show paths and all matches when requested", () => {
-    const output = formatSearchResult(result(), { showMatches: true, showPath: true });
+    const output = stripAnsi(formatSearchResult(result(), { showMatches: true, showPath: true }));
     expect(output).toContain("memos/2026/05/05/151128-2253.md");
     expect(output).toContain("翻译一句话");
     expect(output).toContain("基础插画");
+  });
+
+  it("highlights literal query matches", () => {
+    expect(highlightQuery("翻译一句话", "翻译", true)).toBe("\u001b[1;33m翻译\u001b[0m一句话");
+    expect(highlightQuery("a+b and A+B", "a+b", true)).toBe("\u001b[1;33ma+b\u001b[0m and \u001b[1;33mA+B\u001b[0m");
+    expect(highlightQuery("翻译一句话", "翻译", false)).toBe("翻译一句话");
   });
 });

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { Command } from "commander";
 import { editFile, editText } from "../core/editor.js";
 import { gitAdd, gitCommit } from "../core/git.js";
-import { extractTags, parseMemo, readMemoFile, serializeMemo, validateRawMemo, writeMemoFile } from "../core/memo.js";
+import { extractTags, parseFrontMatter, parseMemo, readMemoFile, serializeMemo, validateRawMemo, writeMemoFile } from "../core/memo.js";
 import { findMemoById, listMemos } from "../core/storage.js";
 import { selectItem } from "../core/selector.js";
 import { flushQueue, generateEventsForLastCommit } from "../core/webhook.js";
@@ -15,8 +15,9 @@ export async function editMemoById(id: string, command: Command, raw = false): P
   if (raw || config.editor.raw_by_default) {
     const original = memo.meta;
     await editFile(memo.filePath);
-    const parsed = parseMemo(await readFile(memo.filePath, "utf8"), memo.filePath, memo.relativePath);
-    const meta = validateRawMemo(parsed, original);
+    const raw = await readFile(memo.filePath, "utf8");
+    const parsed = parseMemo(raw, memo.filePath, memo.relativePath);
+    const meta = validateRawMemo(parsed, original, parseFrontMatter(raw));
     await writeMemoFile(config.data_dir, memo.relativePath, meta, parsed.content);
   } else {
     const edited = (await editText(memo.content + "\n")).trimEnd();

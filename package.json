@@ -3,12 +3,37 @@
   "version": "0.1.0",
   "description": "Local-first Markdown memo CLI backed by Git and webhooks.",
   "type": "module",
+  "license": "MIT",
+  "author": "",
+  "homepage": "https://github.com/imfangli/memoscli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imfangli/memoscli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imfangli/memoscli/issues"
+  },
+  "keywords": [
+    "memo",
+    "markdown",
+    "cli",
+    "git",
+    "webhook",
+    "local-first"
+  ],
+  "packageManager": "pnpm@10.33.3",
   "bin": {
     "memo": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/cli.ts",
+    "prepack": "pnpm build",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

@@ -6,6 +6,7 @@ export interface RunResult {
 }
 
 export function commandExists(command: string): boolean {
+  // v0.1 targets macOS/Linux/WSL where `sh` is available.
   const result = spawnSync("sh", ["-lc", `command -v ${command}`], { encoding: "utf8" });
   return result.status === 0;
 }

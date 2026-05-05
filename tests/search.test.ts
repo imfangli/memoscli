@@ -9,7 +9,7 @@ function result(): SearchResult {
   return {
     relativePath: "memos/2026/05/05/151128-2253.md",
     memo: {
-      filePath: "/Users/felix/.momo/memos/2026/05/05/151128-2253.md",
+      filePath: "/home/user/.momo/memos/2026/05/05/151128-2253.md",
       relativePath: "memos/2026/05/05/151128-2253.md",
       content: "翻译一句话\n基础插画",
       meta: {
@@ -32,7 +32,7 @@ describe("search formatting", () => {
     expect(output).toContain("20260505151128-2253");
     expect(output).toContain("#work");
     expect(output).toContain("翻译一句话");
-    expect(output).not.toContain("/Users/felix");
+    expect(output).not.toContain("/home/user");
     expect(output).not.toContain("memos/2026/05/05/151128-2253.md");
   });
 

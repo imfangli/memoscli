@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createMemoIdentity, extractTags, parseMemo, serializeMemo } from "../src/core/memo.js";
+import { createMemoIdentity, extractTags, parseFrontMatter, parseMemo, serializeMemo, validateRawMemo } from "../src/core/memo.js";
 
 describe("memo core", () => {
   it("creates stable ids and paths from local date parts", () => {
@@ -47,5 +47,19 @@ hello #idea
     const nextRaw = serializeMemo(memo.meta, memo.content);
     expect(memo.meta.id).toBe("20260505143012-a8f3");
     expect(nextRaw).not.toContain("visibility");
+  });
+
+  it("rejects non-array tags in raw front matter validation", () => {
+    const raw = `---
+id: 20260505143012-a8f3
+created_at: 2026-05-05T14:30:12+08:00
+updated_at: 2026-05-05T14:30:12+08:00
+tags: idea
+---
+
+hello #idea
+`;
+    const memo = parseMemo(raw, "/tmp/memo.md", "memos/2026/05/05/143012-a8f3.md");
+    expect(() => validateRawMemo(memo, memo.meta, parseFrontMatter(raw))).toThrow("tags must be an array");
   });
 });

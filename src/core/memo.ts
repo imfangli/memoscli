@@ -37,6 +37,10 @@ export function parseMemo(raw: string, filePath: string, relativePath: string): 
   return { meta, content: parsed.content.trimEnd(), filePath, relativePath };
 }
 
+export function parseFrontMatter(raw: string): Record<string, unknown> {
+  return matter(raw).data;
+}
+
 export async function readMemoFile(filePath: string, dataDir: string): Promise<MemoRecord> {
   const relativePath = path.relative(dataDir, filePath);
   return parseMemo(await readFile(filePath, "utf8"), filePath, relativePath);
@@ -67,17 +71,18 @@ export function newMemo(content: string, date = new Date()): { meta: MemoMetadat
   };
 }
 
-export function validateRawMemo(record: MemoRecord, original: MemoMetadata): MemoMetadata {
+export function validateRawMemo(record: MemoRecord, original: MemoMetadata, rawData?: Record<string, unknown>): MemoMetadata {
   if (!record.meta.id) throw new Error("Invalid front matter: id is required.");
   if (!record.meta.created_at || Number.isNaN(new Date(record.meta.created_at).getTime())) {
     throw new Error("Invalid front matter: created_at must be a valid date.");
   }
-  if (!Array.isArray(record.meta.tags)) throw new Error("Invalid front matter: tags must be an array.");
+  const rawTags = rawData?.tags;
+  if (rawTags !== undefined && !Array.isArray(rawTags)) throw new Error("Invalid front matter: tags must be an array.");
   return {
     ...record.meta,
     id: original.id,
     created_at: original.created_at,
     updated_at: localIso(),
-    tags: record.meta.tags.map(String),
+    tags: (rawTags ?? record.meta.tags).map(String),
   };
 }

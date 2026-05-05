@@ -103,6 +103,8 @@ export async function gitSyncInBackground(dataDir: string): Promise<GitBackgroun
     return { status: "skipped", message: "Git: auto sync skipped, no origin remote configured." };
   }
 
+  // Background sync intentionally uses POSIX shell primitives; Windows native shells
+  // are not part of the v0.1 support target.
   const command = `
 log=".git/memo-sync.log"
 lock=".git/memo-sync.lock"

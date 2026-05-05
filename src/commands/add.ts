@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { commandConfig } from "./helpers.js";
+import { autoSyncMessage, commandConfig } from "./helpers.js";
 import { editText } from "../core/editor.js";
 import { gitAdd, gitCommit } from "../core/git.js";
 import { newMemo, writeMemoFile } from "../core/memo.js";
@@ -25,7 +25,8 @@ export function registerAdd(program: Command): void {
         const result = await flushQueue(config.data_dir, config);
         webhook = result.failed ? `\nWebhook: ${result.sent} sent, ${result.failed} failed` : `\nWebhook: ${result.sent} sent`;
       }
+      const sync = await autoSyncMessage(config);
       console.log(`Added memo: ${memo.meta.id}`);
-      console.log(`Committed: ${message}${webhook}`);
+      console.log(`Committed: ${message}${webhook}${sync}`);
     });
 }

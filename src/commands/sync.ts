@@ -8,7 +8,6 @@ export function registerSync(program: Command): void {
     .description("Run git pull --rebase and git push")
     .action(async (command: Command) => {
       const config = await commandConfig(command);
-      await gitSync(config.data_dir);
-      console.log("Synced.");
+      console.log((await gitSync(config.data_dir)).message);
     });
 }

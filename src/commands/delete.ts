@@ -3,7 +3,7 @@ import { gitCommit, gitRm } from "../core/git.js";
 import { confirm, selectItem } from "../core/selector.js";
 import { findMemoById, listMemos } from "../core/storage.js";
 import { flushQueue, generateEventsForLastCommit } from "../core/webhook.js";
-import { commandConfig, formatMemoLine } from "./helpers.js";
+import { autoSyncMessage, commandConfig, formatMemoLine } from "./helpers.js";
 
 export function registerDelete(program: Command): void {
   program
@@ -31,7 +31,8 @@ export function registerDelete(program: Command): void {
       await gitCommit(config.data_dir, message);
       await generateEventsForLastCommit(config.data_dir);
       if (config.webhook.auto_send) await flushQueue(config.data_dir, config);
+      const sync = await autoSyncMessage(config);
       console.log(`Deleted memo: ${memo.meta.id}`);
-      console.log(`Committed: ${message}`);
+      console.log(`Committed: ${message}${sync}`);
     });
 }

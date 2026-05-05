@@ -18,6 +18,26 @@ function stripAnsi(text: string): string {
   return text.replace(/\u001b\[[0-9;]*m/g, "");
 }
 
+function git(args: string[], cwd: string): string {
+  return execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
+}
+
+function setAutoPush(dir: string, enabled: boolean): void {
+  const configPath = path.join(dir, "config.toml");
+  const config = readFileSync(configPath, "utf8").replace(
+    /auto_push = (true|false)/,
+    `auto_push = ${enabled ? "true" : "false"}`,
+  );
+  writeFileSync(configPath, config);
+}
+
+function createBareRemote(): string {
+  const parent = mkdtempSync(path.join(os.tmpdir(), "memo-remote-"));
+  const remote = path.join(parent, "remote.git");
+  execFileSync("git", ["init", "--bare", remote], { encoding: "utf8" });
+  return remote;
+}
+
 describe("cli", () => {
   it("prints help", () => {
     expect(run(["--help"])).toContain("Local-first Markdown memo CLI");
@@ -76,5 +96,59 @@ describe("cli", () => {
     expect(stripAnsi(withMatches)).toContain("第二行翻译");
 
     expect(run(["--data-dir", dir, "search", "不存在的词"])).toContain("No memos found.");
+  });
+
+  it("does not push after add when auto_push is disabled", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-no-autopush-"));
+    const remote = createBareRemote();
+    run(["init", dir]);
+    execFileSync("git", ["remote", "add", "origin", remote], { cwd: dir });
+    const output = run(["--data-dir", dir, "add", "local only #git"]);
+    expect(output).not.toContain("Git:");
+    expect(execFileSync("git", ["ls-remote", "--heads", "origin"], { cwd: dir, encoding: "utf8" })).toBe("");
+  });
+
+  it("skips auto sync when auto_push is enabled without an origin remote", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-autopush-no-origin-"));
+    run(["init", dir]);
+    setAutoPush(dir, true);
+    const output = run(["--data-dir", dir, "add", "no remote #git"]);
+    expect(output).toContain("Git: auto sync skipped, no origin remote configured.");
+    expect(git(["log", "-1", "--pretty=%s"], dir)).toMatch(/^memo: create /);
+  });
+
+  it("auto pushes and sets upstream after add when auto_push is enabled", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-autopush-"));
+    const remote = createBareRemote();
+    run(["init", dir]);
+    execFileSync("git", ["remote", "add", "origin", remote], { cwd: dir });
+    setAutoPush(dir, true);
+    const output = run(["--data-dir", dir, "add", "auto push #git"]);
+    const branch = git(["branch", "--show-current"], dir);
+    expect(output).toContain(`Git: pushed and set upstream origin/${branch}.`);
+    expect(git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir)).toBe(`origin/${branch}`);
+    expect(execFileSync("git", ["ls-remote", "--heads", "origin", branch], { cwd: dir, encoding: "utf8" })).toContain(branch);
+  });
+
+  it("sync sets upstream on first push", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-sync-upstream-"));
+    const remote = createBareRemote();
+    run(["init", dir]);
+    run(["--data-dir", dir, "add", "manual sync #git"]);
+    execFileSync("git", ["remote", "add", "origin", remote], { cwd: dir });
+    const branch = git(["branch", "--show-current"], dir);
+    expect(run(["--data-dir", dir, "sync"])).toContain(`Git: pushed and set upstream origin/${branch}.`);
+    expect(git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir)).toBe(`origin/${branch}`);
+  });
+
+  it("keeps local commits when auto sync fails", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-sync-fail-"));
+    run(["init", dir]);
+    execFileSync("git", ["remote", "add", "origin", path.join(dir, "missing.git")], { cwd: dir });
+    setAutoPush(dir, true);
+    const output = run(["--data-dir", dir, "add", "sync failure stays local #git"]);
+    expect(output).toContain("Git sync failed:");
+    expect(git(["log", "-1", "--pretty=%s"], dir)).toMatch(/^memo: create /);
+    expect(run(["--data-dir", dir, "list"])).toContain("sync failure stays local");
   });
 });

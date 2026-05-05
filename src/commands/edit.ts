@@ -7,7 +7,7 @@ import { findMemoById, listMemos } from "../core/storage.js";
 import { selectItem } from "../core/selector.js";
 import { flushQueue, generateEventsForLastCommit } from "../core/webhook.js";
 import { localIso } from "../utils/time.js";
-import { commandConfig, formatMemoLine } from "./helpers.js";
+import { autoSyncMessage, commandConfig, formatMemoLine } from "./helpers.js";
 
 export async function editMemoById(id: string, command: Command, raw = false): Promise<void> {
   const config = await commandConfig(command);
@@ -38,8 +38,9 @@ export async function editMemoById(id: string, command: Command, raw = false): P
   await gitCommit(config.data_dir, message);
   await generateEventsForLastCommit(config.data_dir);
   if (config.webhook.auto_send) await flushQueue(config.data_dir, config);
+  const sync = await autoSyncMessage(config);
   console.log(`Updated memo: ${memo.meta.id}`);
-  console.log(`Committed: ${message}`);
+  console.log(`Committed: ${message}${sync}`);
 }
 
 export function registerEdit(program: Command): void {

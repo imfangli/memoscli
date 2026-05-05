@@ -1,8 +1,9 @@
 import { Command } from "commander";
-import { MemoRecord } from "../types.js";
+import { MemoRecord, MomoConfig } from "../types.js";
 import { loadConfig } from "../core/config.js";
 import { displayDateTime } from "../utils/time.js";
 import { summarize } from "../core/storage.js";
+import { gitSync } from "../core/git.js";
 
 export async function commandConfig(_command?: Command) {
   const index = process.argv.indexOf("--data-dir");
@@ -22,4 +23,14 @@ export function printMemo(memo: MemoRecord): void {
   if (memo.meta.tags.length) console.log(`tags: ${memo.meta.tags.join(", ")}`);
   console.log("");
   console.log(memo.content);
+}
+
+export async function autoSyncMessage(config: MomoConfig): Promise<string> {
+  if (!config.git.auto_push) return "";
+  try {
+    return `\n${(await gitSync(config.data_dir)).message}`;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return `\nGit sync failed: ${message}`;
+  }
 }

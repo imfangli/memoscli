@@ -1,5 +1,10 @@
 import { run } from "../utils/shell.js";
 
+export type GitSyncResult =
+  | { status: "synced"; message: "Git: synced." }
+  | { status: "upstream-set"; message: string }
+  | { status: "skipped"; message: "Git: auto sync skipped, no origin remote configured." };
+
 export async function gitInit(dataDir: string): Promise<void> {
   await run("git", ["init"], { cwd: dataDir });
 }
@@ -63,7 +68,26 @@ export async function gitRemoteNames(dataDir: string): Promise<string[]> {
   return result.stdout.split("\n").filter(Boolean);
 }
 
-export async function gitSync(dataDir: string): Promise<void> {
-  await run("git", ["pull", "--rebase"], { cwd: dataDir });
-  await run("git", ["push"], { cwd: dataDir });
+export async function gitUpstream(dataDir: string): Promise<string | undefined> {
+  const result = await run("git", ["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], {
+    cwd: dataDir,
+    allowFailure: true,
+  });
+  return result.stdout.trim() || undefined;
+}
+
+export async function gitSync(dataDir: string): Promise<GitSyncResult> {
+  const remotes = await gitRemoteNames(dataDir);
+  if (!remotes.includes("origin")) {
+    return { status: "skipped", message: "Git: auto sync skipped, no origin remote configured." };
+  }
+  const upstream = await gitUpstream(dataDir);
+  if (upstream) {
+    await run("git", ["pull", "--rebase"], { cwd: dataDir });
+    await run("git", ["push"], { cwd: dataDir });
+    return { status: "synced", message: "Git: synced." };
+  }
+  const branch = await gitBranch(dataDir);
+  await run("git", ["push", "-u", "origin", branch], { cwd: dataDir });
+  return { status: "upstream-set", message: `Git: pushed and set upstream origin/${branch}.` };
 }

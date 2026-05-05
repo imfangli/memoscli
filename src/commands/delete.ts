@@ -8,6 +8,7 @@ import { autoSyncMessage, commandConfig, formatMemoLine } from "./helpers.js";
 export function registerDelete(program: Command): void {
   program
     .command("delete")
+    .alias("rm")
     .argument("[id]", "memo id")
     .description("Delete a memo")
     .option("--select", "choose a memo interactively")

@@ -46,6 +46,7 @@ export async function editMemoById(id: string, command: Command, raw = false): P
 export function registerEdit(program: Command): void {
   program
     .command("edit")
+    .alias("e")
     .argument("[id]", "memo id")
     .description("Edit a memo")
     .option("--select", "choose a memo interactively")

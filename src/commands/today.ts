@@ -6,6 +6,7 @@ import { localDateString } from "../utils/time.js";
 export function registerToday(program: Command): void {
   program
     .command("today")
+    .alias("td")
     .description("Show today's memos")
     .action(async (command: Command) => {
       const config = await commandConfig(command);

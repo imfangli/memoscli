@@ -5,6 +5,7 @@ import { commandConfig, printMemo } from "./helpers.js";
 export function registerShow(program: Command): void {
   program
     .command("show")
+    .alias("sh")
     .argument("<id>", "memo id")
     .description("Show a memo")
     .action(async (id: string, command: Command) => {

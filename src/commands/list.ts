@@ -5,6 +5,7 @@ import { commandConfig, formatMemoLine } from "./helpers.js";
 export function registerList(program: Command): void {
   program
     .command("list")
+    .alias("ls")
     .description("List recent memos")
     .option("--limit <number>", "max results", "20")
     .option("--tag <tag>", "filter by tag")

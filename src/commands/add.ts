@@ -8,6 +8,7 @@ import { flushQueue, generateEventsForLastCommit } from "../core/webhook.js";
 export function registerAdd(program: Command): void {
   program
     .command("add")
+    .alias("a")
     .argument("[content...]", "memo content")
     .description("Add a memo")
     .action(async (contentParts: string[], command: Command) => {

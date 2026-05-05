@@ -6,6 +6,7 @@ import { commandConfig, formatMemoLine, printMemo } from "./helpers.js";
 export function registerOpen(program: Command): void {
   program
     .command("open")
+    .alias("o")
     .description("Interactively select and show a memo")
     .option("--limit <number>", "candidate count", "100")
     .action(async (options: { limit: string }, command: Command) => {

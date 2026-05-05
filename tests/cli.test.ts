@@ -75,6 +75,31 @@ describe("cli", () => {
     expect(log).toContain(`memo: delete ${id}`);
   });
 
+  it("supports short command aliases", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-alias-"));
+    run(["i", dir]);
+    const addOutput = run(["--data-dir", dir, "a", "quickalias content #alias"]);
+    const id = addOutput.match(/Added memo: (\S+)/)?.[1];
+    expect(id).toBeTruthy();
+    expect(run(["--data-dir", dir, "ls"])).toContain("quickalias content");
+    expect(stripAnsi(run(["--data-dir", dir, "s", "quickalias"]))).toContain("quickalias content");
+    expect(run(["--data-dir", dir, "sh", id!])).toContain("quickalias content");
+    expect(run(["--data-dir", dir, "st"])).toContain(`Data dir: ${dir}`);
+    expect(run(["--data-dir", dir, "td"])).toContain("quickalias content");
+    expect(run(["--data-dir", dir, "wh", "st"])).toContain("Pending:");
+    run(["--data-dir", dir, "rm", id!, "--yes"]);
+    expect(run(["--data-dir", dir, "ls"])).not.toContain("quickalias content");
+  });
+
+  it("shows aliases in help output", () => {
+    const help = run(["--help"]);
+    expect(help).toContain("add|a");
+    expect(help).toContain("list|ls");
+    expect(help).toContain("search|s");
+    expect(help).toContain("delete|rm");
+    expect(run(["wh", "--help"])).toContain("status|st");
+  });
+
   it("creates pending events when auto_send is disabled", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "momo-events-"));
     run(["init", dir]);

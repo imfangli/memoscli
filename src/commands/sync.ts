@@ -5,6 +5,7 @@ import { commandConfig } from "./helpers.js";
 export function registerSync(program: Command): void {
   program
     .command("sync")
+    .alias("sy")
     .description("Run git pull --rebase and git push")
     .action(async (command: Command) => {
       const config = await commandConfig(command);

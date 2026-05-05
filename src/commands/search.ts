@@ -6,6 +6,7 @@ import { commandConfig, printMemo } from "./helpers.js";
 export function registerSearch(program: Command): void {
   program
     .command("search")
+    .alias("s")
     .argument("<query>", "search query")
     .description("Search memo files")
     .option("--limit <number>", "max results", "20")

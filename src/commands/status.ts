@@ -9,6 +9,7 @@ import { localDateString } from "../utils/time.js";
 export function registerStatus(program: Command): void {
   program
     .command("status")
+    .alias("st")
     .description("Show memo status")
     .action(async (command: Command) => {
       const config = await commandConfig(command);

@@ -3,9 +3,9 @@ import { generateEventsFromDiff, countEvents, flushQueue, createTestEvent, sendE
 import { commandConfig } from "./helpers.js";
 
 export function registerWebhook(program: Command): void {
-  const webhook = program.command("webhook").description("Manage webhook events");
+  const webhook = program.command("webhook").alias("wh").description("Manage webhook events");
 
-  webhook.command("status").description("Show webhook queue status").action(async (command: Command) => {
+  webhook.command("status").alias("st").description("Show webhook queue status").action(async (command: Command) => {
     const config = await commandConfig(command);
     console.log("Endpoints:");
     for (const endpoint of config.webhook.endpoints) {
@@ -16,19 +16,19 @@ export function registerWebhook(program: Command): void {
     console.log(`Failed: ${await countEvents(config.data_dir, "failed")}`);
   });
 
-  webhook.command("flush").description("Send pending webhook events").action(async (command: Command) => {
+  webhook.command("flush").alias("f").description("Send pending webhook events").action(async (command: Command) => {
     const config = await commandConfig(command);
     const result = await flushQueue(config.data_dir, config, "pending");
     console.log(`Webhook flush: ${result.sent} sent, ${result.failed} failed`);
   });
 
-  webhook.command("retry").description("Retry failed webhook events").action(async (command: Command) => {
+  webhook.command("retry").alias("r").description("Retry failed webhook events").action(async (command: Command) => {
     const config = await commandConfig(command);
     const result = await flushQueue(config.data_dir, config, "failed");
     console.log(`Webhook retry: ${result.sent} sent, ${result.failed} failed`);
   });
 
-  webhook.command("test").argument("<name>", "endpoint name").description("Send a webhook test event").action(async (name: string, command: Command) => {
+  webhook.command("test").alias("t").argument("<name>", "endpoint name").description("Send a webhook test event").action(async (name: string, command: Command) => {
     const config = await commandConfig(command);
     const event = await createTestEvent(name);
     const endpoint = config.webhook.endpoints.find((item) => item.name === name);
@@ -39,6 +39,7 @@ export function registerWebhook(program: Command): void {
 
   webhook
     .command("generate")
+    .alias("g")
     .requiredOption("--from <ref>", "from git ref")
     .requiredOption("--to <ref>", "to git ref")
     .description("Generate webhook events from a git diff")

@@ -7,6 +7,7 @@ import { ensureDir, resolvePath } from "../utils/fs.js";
 export function registerInit(program: Command): void {
   program
     .command("init")
+    .alias("i")
     .argument("[dir]", "data directory", "~/.momo")
     .description("Initialize a memo data directory")
     .action(async (dir: string) => {

@@ -1,8 +1,13 @@
+import { spawn } from "node:child_process";
 import { run } from "../utils/shell.js";
 
 export type GitSyncResult =
   | { status: "synced"; message: "Git: synced." }
   | { status: "upstream-set"; message: string }
+  | { status: "skipped"; message: "Git: auto sync skipped, no origin remote configured." };
+
+export type GitBackgroundSyncResult =
+  | { status: "started"; message: "Git: sync started in background. Log: .git/memo-sync.log" }
   | { status: "skipped"; message: "Git: auto sync skipped, no origin remote configured." };
 
 export async function gitInit(dataDir: string): Promise<void> {
@@ -90,4 +95,42 @@ export async function gitSync(dataDir: string): Promise<GitSyncResult> {
   const branch = await gitBranch(dataDir);
   await run("git", ["push", "-u", "origin", branch], { cwd: dataDir });
   return { status: "upstream-set", message: `Git: pushed and set upstream origin/${branch}.` };
+}
+
+export async function gitSyncInBackground(dataDir: string): Promise<GitBackgroundSyncResult> {
+  const remotes = await gitRemoteNames(dataDir);
+  if (!remotes.includes("origin")) {
+    return { status: "skipped", message: "Git: auto sync skipped, no origin remote configured." };
+  }
+
+  const command = `
+log=".git/memo-sync.log"
+lock=".git/memo-sync.lock"
+{
+  echo ""
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] memo background git sync started"
+} >> "$log"
+if ! mkdir "$lock" 2>/dev/null; then
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] another git sync is already running" >> "$log"
+  exit 0
+fi
+trap 'rmdir "$lock"' EXIT
+if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+  git pull --rebase >> "$log" 2>&1 && git push >> "$log" 2>&1
+else
+  branch="$(git branch --show-current)"
+  git push -u origin "$branch" >> "$log" 2>&1
+fi
+status=$?
+echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] memo background git sync exited with $status" >> "$log"
+exit "$status"
+`;
+
+  const child = spawn("sh", ["-c", command], {
+    cwd: dataDir,
+    detached: true,
+    stdio: "ignore",
+  });
+  child.unref();
+  return { status: "started", message: "Git: sync started in background. Log: .git/memo-sync.log" };
 }

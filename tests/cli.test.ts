@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { setTimeout as delay } from "node:timers/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -36,6 +37,15 @@ function createBareRemote(): string {
   const remote = path.join(parent, "remote.git");
   execFileSync("git", ["init", "--bare", remote], { encoding: "utf8" });
   return remote;
+}
+
+async function waitFor(condition: () => boolean, timeoutMs = 8000): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (condition()) return;
+    await delay(100);
+  }
+  throw new Error("Timed out waiting for condition.");
 }
 
 describe("cli", () => {
@@ -117,7 +127,7 @@ describe("cli", () => {
     expect(git(["log", "-1", "--pretty=%s"], dir)).toMatch(/^memo: create /);
   });
 
-  it("auto pushes and sets upstream after add when auto_push is enabled", () => {
+  it("starts background sync after add when auto_push is enabled", async () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "memo-autopush-"));
     const remote = createBareRemote();
     run(["init", dir]);
@@ -125,9 +135,11 @@ describe("cli", () => {
     setAutoPush(dir, true);
     const output = run(["--data-dir", dir, "add", "auto push #git"]);
     const branch = git(["branch", "--show-current"], dir);
-    expect(output).toContain(`Git: pushed and set upstream origin/${branch}.`);
+    expect(output).toContain("Git: sync started in background. Log: .git/memo-sync.log");
+    await waitFor(() =>
+      execFileSync("git", ["ls-remote", "--heads", "origin", branch], { cwd: dir, encoding: "utf8" }).includes(branch),
+    );
     expect(git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir)).toBe(`origin/${branch}`);
-    expect(execFileSync("git", ["ls-remote", "--heads", "origin", branch], { cwd: dir, encoding: "utf8" })).toContain(branch);
   });
 
   it("sync sets upstream on first push", () => {
@@ -141,14 +153,16 @@ describe("cli", () => {
     expect(git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir)).toBe(`origin/${branch}`);
   });
 
-  it("keeps local commits when auto sync fails", () => {
+  it("keeps local commits when background auto sync later fails", async () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "memo-sync-fail-"));
     run(["init", dir]);
     execFileSync("git", ["remote", "add", "origin", path.join(dir, "missing.git")], { cwd: dir });
     setAutoPush(dir, true);
     const output = run(["--data-dir", dir, "add", "sync failure stays local #git"]);
-    expect(output).toContain("Git sync failed:");
+    expect(output).toContain("Git: sync started in background. Log: .git/memo-sync.log");
     expect(git(["log", "-1", "--pretty=%s"], dir)).toMatch(/^memo: create /);
     expect(run(["--data-dir", dir, "list"])).toContain("sync failure stays local");
+    await waitFor(() => readFileSync(path.join(dir, ".git", "memo-sync.log"), "utf8").includes("exited with"));
+    expect(readFileSync(path.join(dir, ".git", "memo-sync.log"), "utf8")).toContain("exited with");
   });
 });

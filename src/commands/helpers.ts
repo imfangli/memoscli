@@ -3,7 +3,7 @@ import { MemoRecord, MomoConfig } from "../types.js";
 import { loadConfig } from "../core/config.js";
 import { displayDateTime } from "../utils/time.js";
 import { summarize } from "../core/storage.js";
-import { gitSync } from "../core/git.js";
+import { gitSyncInBackground } from "../core/git.js";
 
 export async function commandConfig(_command?: Command) {
   const index = process.argv.indexOf("--data-dir");
@@ -28,9 +28,9 @@ export function printMemo(memo: MemoRecord): void {
 export async function autoSyncMessage(config: MomoConfig): Promise<string> {
   if (!config.git.auto_push) return "";
   try {
-    return `\n${(await gitSync(config.data_dir)).message}`;
+    return `\n${(await gitSyncInBackground(config.data_dir)).message}`;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return `\nGit sync failed: ${message}`;
+    return `\nGit background sync failed to start: ${message}`;
   }
 }

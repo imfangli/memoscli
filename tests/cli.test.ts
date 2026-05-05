@@ -23,6 +23,14 @@ describe("cli", () => {
     expect(run(["--help"])).toContain("Local-first Markdown memo CLI");
   });
 
+  it("initializes data gitignore rules", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-init-"));
+    run(["init", dir]);
+    const gitignore = readFileSync(path.join(dir, ".gitignore"), "utf8");
+    expect(gitignore).toContain("config.toml");
+    expect(gitignore).toContain("events/**/*.json");
+  });
+
   it("initializes, adds, lists, shows, and deletes a memo", () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), "momo-test-"));
     run(["init", dir]);

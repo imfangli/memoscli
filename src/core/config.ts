@@ -61,6 +61,34 @@ export async function createDefaultConfig(dataDir: string): Promise<void> {
   }
 }
 
+export const defaultDataGitignore = `# Local machine configuration may contain paths, secrets, and endpoint URLs.
+config.toml
+
+# Webhook queue files are runtime state, not memo source data.
+events/**/*.json
+
+# System files.
+.DS_Store
+`;
+
+export async function ensureDataGitignore(dataDir: string): Promise<void> {
+  await ensureDir(dataDir);
+  const filePath = path.join(dataDir, ".gitignore");
+  const existing = (await pathExists(filePath)) ? await readFile(filePath, "utf8") : "";
+  const missing = defaultDataGitignore
+    .split("\n")
+    .filter((line) => line.trim() && !line.trim().startsWith("#"))
+    .filter((line) => !existing.split("\n").includes(line));
+  if (!existing) {
+    await writeFile(filePath, defaultDataGitignore, "utf8");
+    return;
+  }
+  if (missing.length > 0) {
+    const prefix = existing.endsWith("\n") ? existing : `${existing}\n`;
+    await writeFile(filePath, `${prefix}\n# Added by memo CLI.\n${missing.join("\n")}\n`, "utf8");
+  }
+}
+
 export async function loadConfig(dataDirOverride?: string): Promise<MomoConfig> {
   const envDir = process.env.MOMO_DIR;
   const initialDir = resolvePath(dataDirOverride || envDir || "~/.momo");

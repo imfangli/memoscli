@@ -1,6 +1,6 @@
 import path from "node:path";
 import { Command } from "commander";
-import { createDefaultConfig } from "../core/config.js";
+import { createDefaultConfig, ensureDataGitignore } from "../core/config.js";
 import { gitInit } from "../core/git.js";
 import { ensureDir, resolvePath } from "../utils/fs.js";
 
@@ -19,6 +19,7 @@ export function registerInit(program: Command): void {
         ensureDir(path.join(dataDir, "events", "failed")),
       ]);
       await createDefaultConfig(dataDir);
+      await ensureDataGitignore(dataDir);
       await gitInit(dataDir);
       console.log(`Initialized memo data directory: ${dataDir}`);
     });

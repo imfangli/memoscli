@@ -1,0 +1,69 @@
+import { run } from "../utils/shell.js";
+
+export async function gitInit(dataDir: string): Promise<void> {
+  await run("git", ["init"], { cwd: dataDir });
+}
+
+export async function gitAdd(dataDir: string, relativePath: string): Promise<void> {
+  await run("git", ["add", "--", relativePath], { cwd: dataDir });
+}
+
+export async function gitRm(dataDir: string, relativePath: string): Promise<void> {
+  await run("git", ["rm", "--quiet", "--", relativePath], { cwd: dataDir });
+}
+
+export async function gitCommit(dataDir: string, message: string): Promise<void> {
+  await run(
+    "git",
+    ["-c", "user.name=momo", "-c", "user.email=momo@example.invalid", "commit", "-m", message],
+    { cwd: dataDir },
+  );
+}
+
+export async function gitHead(dataDir: string): Promise<string> {
+  return (await run("git", ["rev-parse", "--short", "HEAD"], { cwd: dataDir })).stdout.trim();
+}
+
+export async function gitBranch(dataDir: string): Promise<string> {
+  return (await run("git", ["branch", "--show-current"], { cwd: dataDir, allowFailure: true })).stdout.trim() || "HEAD";
+}
+
+export async function gitCommitMessage(dataDir: string, ref = "HEAD"): Promise<string> {
+  return (await run("git", ["log", "-1", "--pretty=%B", ref], { cwd: dataDir })).stdout.trim();
+}
+
+export async function gitHasParent(dataDir: string, ref = "HEAD"): Promise<boolean> {
+  const result = await run("git", ["rev-parse", "--verify", `${ref}~1`], { cwd: dataDir, allowFailure: true });
+  return !result.stderr && Boolean(result.stdout.trim());
+}
+
+export async function gitDiffNameStatus(dataDir: string, from: string, to: string): Promise<string[]> {
+  const result = await run("git", ["diff", "--name-status", from, to, "--", "memos/"], { cwd: dataDir });
+  return result.stdout.split("\n").filter(Boolean);
+}
+
+export async function gitLastCommitNameStatus(dataDir: string): Promise<string[]> {
+  if (await gitHasParent(dataDir)) return gitDiffNameStatus(dataDir, "HEAD~1", "HEAD");
+  const result = await run("git", ["diff-tree", "--root", "--name-status", "--no-commit-id", "-r", "HEAD", "--", "memos/"], {
+    cwd: dataDir,
+  });
+  return result.stdout.split("\n").filter(Boolean);
+}
+
+export async function gitShow(dataDir: string, refPath: string): Promise<string> {
+  return (await run("git", ["show", refPath], { cwd: dataDir })).stdout;
+}
+
+export async function gitStatusShort(dataDir: string): Promise<string> {
+  return (await run("git", ["status", "--short"], { cwd: dataDir, allowFailure: true })).stdout.trim();
+}
+
+export async function gitRemoteNames(dataDir: string): Promise<string[]> {
+  const result = await run("git", ["remote"], { cwd: dataDir, allowFailure: true });
+  return result.stdout.split("\n").filter(Boolean);
+}
+
+export async function gitSync(dataDir: string): Promise<void> {
+  await run("git", ["pull", "--rebase"], { cwd: dataDir });
+  await run("git", ["push"], { cwd: dataDir });
+}

@@ -41,4 +41,25 @@ describe("cli", () => {
     const status = run(["--data-dir", dir, "webhook", "status"]);
     expect(status).toContain("Pending: 1");
   });
+
+  it("prints memo-friendly search results", () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-search-"));
+    run(["init", dir]);
+    run(["--data-dir", dir, "add", "第一行翻译 #work\n第二行翻译"]);
+
+    const output = run(["--data-dir", dir, "search", "翻译"]);
+    expect(output).toContain("#work");
+    expect(output).toContain("第一行翻译");
+    expect(output).not.toContain(dir);
+
+    const withPath = run(["--data-dir", dir, "search", "翻译", "--path"]);
+    expect(withPath).toContain("memos/");
+    expect(withPath).not.toContain(dir);
+
+    const withMatches = run(["--data-dir", dir, "search", "翻译", "--matches"]);
+    expect(withMatches).toContain("第一行翻译");
+    expect(withMatches).toContain("第二行翻译");
+
+    expect(run(["--data-dir", dir, "search", "不存在的词"])).toContain("No memos found.");
+  });
 });

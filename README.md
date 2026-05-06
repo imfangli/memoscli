@@ -443,6 +443,10 @@ Release tags must match `package.json` exactly, for example `v0.1.0`.
 
 See [SECURITY.md](SECURITY.md).
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=imfangli/memoscli&type=Date)](https://www.star-history.com/#imfangli/memoscli&Date)
+
 ## License
 
 MIT

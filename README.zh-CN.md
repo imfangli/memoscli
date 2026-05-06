@@ -374,6 +374,10 @@ git -C ~/.momo status --short --branch
 
 `memo` 仍然可用。搜索会回退到 `grep`，交互式选择会回退到基础 Node prompt。
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=imfangli/memoscli&type=Date)](https://www.star-history.com/#imfangli/memoscli&Date)
+
 ## 贡献、安全和许可
 
 - 贡献指南见 [CONTRIBUTING.md](CONTRIBUTING.md)。

@@ -1,5 +1,7 @@
 # memoscli
 
+[中文文档](README.zh-CN.md)
+
 Local-first Markdown memo CLI backed by Git and webhooks.
 
 `memoscli` is a small command-line memo tool for people who prefer writing from the terminal. It is not a replacement for the Memos web app. The core idea is simpler: one memo is one Markdown file, Git records history and sync, and optional webhooks notify external systems.
@@ -127,8 +129,8 @@ pnpm link --global
 Development mode:
 
 ```bash
-pnpm dev -- --help
-pnpm dev -- init /tmp/memo-demo
+pnpm dev --help
+pnpm dev init /tmp/memo-demo
 ```
 
 ## Data Model

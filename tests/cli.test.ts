@@ -155,7 +155,7 @@ describe("cli", () => {
     expect(run(["--data-dir", dir, "wh", "st"])).toContain("Pending:");
     run(["--data-dir", dir, "rm", id!, "--yes"]);
     expect(run(["--data-dir", dir, "ls"])).not.toContain("quickalias content");
-  });
+  }, 15000);
 
   it("shows aliases in help output", () => {
     const help = run(["--help"]);

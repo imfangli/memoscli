@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/memoscli-logo.svg" alt="memoscli" width="360">
+</p>
+
 # memoscli
 
 [English README](README.md)

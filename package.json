@@ -1,6 +1,6 @@
 {
   "name": "memoscli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Local-first Markdown memo CLI backed by Git and webhooks.",
   "type": "module",
   "license": "MIT",
@@ -30,6 +30,7 @@
   },
   "files": [
     "dist",
+    "assets",
     "README.md",
     "README.zh-CN.md",
     "LICENSE"

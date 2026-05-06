@@ -13,7 +13,7 @@ describe("package metadata", () => {
       scripts?: Record<string, string>;
     };
     expect(pkg.license).toBe("MIT");
-    expect(pkg.files).toEqual(["dist", "README.md", "README.zh-CN.md", "LICENSE"]);
+    expect(pkg.files).toEqual(["dist", "assets", "README.md", "README.zh-CN.md", "LICENSE"]);
     expect(pkg.publishConfig?.registry).toBe("https://registry.npmjs.org/");
     expect(pkg.scripts?.prepack).toBe("pnpm build");
     expect(pkg.scripts?.["release:check"]).toBe("node scripts/check-release-version.mjs");

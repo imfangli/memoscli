@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+
+- Add a project logo asset and show it at the top of the English and Chinese README files.
+- Include README assets in the published npm package.
+
 ## 0.2.0
 
 - Add `memo init --from <repo>` to initialize a memo data directory from an existing Git repository.

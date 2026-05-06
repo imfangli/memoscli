@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/memoscli-logo.svg" alt="memoscli" width="360">
+</p>
+
 # memoscli
 
 [中文文档](README.zh-CN.md)

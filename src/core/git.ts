@@ -14,6 +14,10 @@ export async function gitInit(dataDir: string): Promise<void> {
   await run("git", ["init"], { cwd: dataDir });
 }
 
+export async function gitClone(repoUrl: string, dataDir: string): Promise<void> {
+  await run("git", ["clone", repoUrl, dataDir]);
+}
+
 export async function gitAdd(dataDir: string, relativePath: string): Promise<void> {
   await run("git", ["add", "--", relativePath], { cwd: dataDir });
 }

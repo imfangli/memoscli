@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Add `memo init --from <repo>` to initialize a memo data directory from an existing Git repository.
+- Bootstrap local-only config and runtime directories after cloning a memo data repository.
+- Refuse to clone into non-empty target directories to avoid overwriting local files.
+- Document multi-computer GitHub sync setup and troubleshooting.
+
 ## 0.1.0
 
 - First npm release.

@@ -69,6 +69,18 @@ memo ls
 memo s "local-first"
 ```
 
+To use the same memo repository on another computer, initialize from the existing GitHub repository:
+
+```bash
+memo init --from https://github.com/user/memos.git
+```
+
+Or choose a custom local data directory:
+
+```bash
+memo init ~/notes/memo --from git@github.com:user/memos.git
+```
+
 Open a memo:
 
 ```bash
@@ -199,6 +211,23 @@ MOMO_DIR=~/notes/memo memo ls
 ## Git Sync
 
 Each memo mutation creates a local Git commit.
+
+On the first computer, initialize a data directory, add an `origin` remote, then sync:
+
+```bash
+memo init
+git -C ~/.momo remote add origin git@github.com:user/memos.git
+memo sync
+```
+
+On another computer, clone that data repository and finish local setup in one step:
+
+```bash
+memo init --from git@github.com:user/memos.git
+memo sync
+```
+
+`config.toml` is created per machine and is not synced because it can contain local paths, webhook URLs, and secrets.
 
 Manual sync:
 
@@ -348,6 +377,30 @@ memo sync
 ```
 
 `memo sync` can set upstream automatically when an `origin` remote exists.
+
+### `memo init --from` says the target directory is non-empty
+
+Choose an empty directory, remove the old directory yourself, or clone into a different path:
+
+```bash
+memo init ~/notes/memo --from git@github.com:user/memos.git
+```
+
+`memo` will not overwrite files in a non-empty target directory.
+
+### `memo init --from` cannot access GitHub
+
+Check that the repository URL is correct and that Git can authenticate:
+
+```bash
+git ls-remote git@github.com:user/memos.git
+```
+
+For SSH URLs, make sure your SSH key is available to Git. For HTTPS URLs, make sure your Git credential helper has a valid token.
+
+### Cloned repository has no memos
+
+Make sure the remote is the memo data repository, not the `memoscli` source code repository. A memo data repository should contain the `memos/` directory and Git history for your memo files.
 
 ### Background sync did not push
 

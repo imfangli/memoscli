@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { setTimeout as delay } from "node:timers/promises";
 import os from "node:os";
 import path from "node:path";
@@ -13,6 +13,20 @@ function run(args: string[], cwd = root): string {
   const env = { ...process.env };
   delete env.NO_COLOR;
   return execFileSync(tsx, [cli, ...args], { cwd, encoding: "utf8", env });
+}
+
+function runError(args: string[], cwd = root): string {
+  const env = { ...process.env };
+  delete env.NO_COLOR;
+  try {
+    execFileSync(tsx, [cli, ...args], { cwd, encoding: "utf8", env, stdio: "pipe" });
+    throw new Error("Expected command to fail.");
+  } catch (error) {
+    if (error instanceof Error && "stderr" in error) {
+      return String((error as { stderr: Buffer | string }).stderr);
+    }
+    throw error;
+  }
 }
 
 function stripAnsi(text: string): string {
@@ -39,6 +53,18 @@ function createBareRemote(): string {
   return remote;
 }
 
+function createRemoteWithMemo(): { remote: string; branch: string } {
+  const source = mkdtempSync(path.join(os.tmpdir(), "memo-source-"));
+  const remote = createBareRemote();
+  run(["init", source]);
+  run(["--data-dir", source, "add", "cloned from remote #sync"]);
+  execFileSync("git", ["remote", "add", "origin", remote], { cwd: source });
+  const branch = git(["branch", "--show-current"], source);
+  run(["--data-dir", source, "sync"]);
+  execFileSync("git", ["symbolic-ref", "HEAD", `refs/heads/${branch}`], { cwd: remote });
+  return { remote, branch };
+}
+
 async function waitFor(condition: () => boolean, timeoutMs = 8000): Promise<void> {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
@@ -59,6 +85,38 @@ describe("cli", () => {
     const gitignore = readFileSync(path.join(dir, ".gitignore"), "utf8");
     expect(gitignore).toContain("config.toml");
     expect(gitignore).toContain("events/**/*.json");
+  });
+
+  it("initializes from an existing git repository", () => {
+    const { remote, branch } = createRemoteWithMemo();
+    const parent = mkdtempSync(path.join(os.tmpdir(), "memo-clone-parent-"));
+    const dir = path.join(parent, "memo-data");
+
+    const output = run(["init", dir, "--from", remote]);
+
+    expect(output).toContain(`Initialized memo data directory from ${remote}: ${dir}`);
+    expect(run(["--data-dir", dir, "list"])).toContain("cloned from remote");
+    expect(readFileSync(path.join(dir, "config.toml"), "utf8")).toContain(`data_dir = ${JSON.stringify(dir)}`);
+    expect(readFileSync(path.join(dir, ".gitignore"), "utf8")).toContain("config.toml");
+    expect(git(["remote", "get-url", "origin"], dir)).toBe(remote);
+    expect(git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir)).toBe(`origin/${branch}`);
+    expect(run(["--data-dir", dir, "sync"])).toContain("Git: synced.");
+    expect(existsSync(path.join(dir, "assets"))).toBe(true);
+    expect(existsSync(path.join(dir, "events", "pending"))).toBe(true);
+    expect(existsSync(path.join(dir, "events", "sent"))).toBe(true);
+    expect(existsSync(path.join(dir, "events", "failed"))).toBe(true);
+  });
+
+  it("refuses to clone into a non-empty directory", () => {
+    const { remote } = createRemoteWithMemo();
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-non-empty-"));
+    const keep = path.join(dir, "keep.txt");
+    writeFileSync(keep, "do not overwrite");
+
+    const error = runError(["init", dir, "--from", remote]);
+
+    expect(error).toContain(`Cannot clone into non-empty directory: ${dir}`);
+    expect(readFileSync(keep, "utf8")).toBe("do not overwrite");
   });
 
   it("initializes, adds, lists, shows, and deletes a memo", () => {

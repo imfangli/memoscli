@@ -37,6 +37,14 @@ function git(args: string[], cwd: string): string {
   return execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
 }
 
+function tryGit(args: string[], cwd: string): string {
+  try {
+    return execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  } catch {
+    return "";
+  }
+}
+
 function setAutoPush(dir: string, enabled: boolean): void {
   const configPath = path.join(dir, "config.toml");
   const config = readFileSync(configPath, "utf8").replace(
@@ -219,9 +227,14 @@ describe("cli", () => {
     const output = run(["--data-dir", dir, "add", "auto push #git"]);
     const branch = git(["branch", "--show-current"], dir);
     expect(output).toContain("Git: sync started in background. Log: .git/memo-sync.log");
-    await waitFor(() =>
-      execFileSync("git", ["ls-remote", "--heads", "origin", branch], { cwd: dir, encoding: "utf8" }).includes(branch),
-    );
+    await waitFor(() => {
+      const remoteHead = execFileSync("git", ["ls-remote", "--heads", "origin", branch], {
+        cwd: dir,
+        encoding: "utf8",
+      });
+      const upstream = tryGit(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir);
+      return remoteHead.includes(branch) && upstream === `origin/${branch}`;
+    });
     expect(git(["rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{u}"], dir)).toBe(`origin/${branch}`);
   });
 

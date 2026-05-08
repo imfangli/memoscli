@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Rename remaining legacy project-name references to `memo` across defaults, environment variables, webhook metadata, docs, and tests.
+
 ## 0.3.0
 
 - Add a project logo asset and show it at the top of the English and Chinese README files.

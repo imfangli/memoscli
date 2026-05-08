@@ -12,13 +12,13 @@ Do not include live webhook URLs, tokens, secrets, private memo content, or repo
 
 ## Local Secrets
 
-`~/.momo/config.toml` may contain webhook URLs and HMAC secrets. The default memo data `.gitignore` ignores this file.
+`~/.memo/config.toml` may contain webhook URLs and HMAC secrets. The default memo data `.gitignore` ignores this file.
 
 Before publishing a memo data repository, check:
 
 ```bash
-git -C ~/.momo status --short
-git -C ~/.momo grep -n "secret\\|token\\|password" || true
+git -C ~/.memo status --short
+git -C ~/.memo grep -n "secret\\|token\\|password" || true
 ```
 
 Webhook queue files under `events/` are runtime state and are ignored by default.

@@ -1,10 +1,10 @@
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import toml from "toml";
-import { MomoConfig } from "../types.js";
+import { MemoConfig } from "../types.js";
 import { ensureDir, pathExists, resolvePath } from "../utils/fs.js";
 
-export function defaultConfig(dataDir = "~/.momo"): MomoConfig {
+export function defaultConfig(dataDir = "~/.memo"): MemoConfig {
   return {
     data_dir: dataDir,
     git: { auto_commit: true, auto_push: false, default_branch: "main" },
@@ -20,7 +20,7 @@ export function defaultConfig(dataDir = "~/.momo"): MomoConfig {
   };
 }
 
-export function configToToml(config: MomoConfig): string {
+export function configToToml(config: MemoConfig): string {
   const endpoints = config.webhook.endpoints
     .map(
       (endpoint) => `
@@ -89,14 +89,14 @@ export async function ensureDataGitignore(dataDir: string): Promise<void> {
   }
 }
 
-export async function loadConfig(dataDirOverride?: string): Promise<MomoConfig> {
-  const envDir = process.env.MOMO_DIR;
-  const initialDir = resolvePath(dataDirOverride || envDir || "~/.momo");
+export async function loadConfig(dataDirOverride?: string): Promise<MemoConfig> {
+  const envDir = process.env.MEMO_DIR;
+  const initialDir = resolvePath(dataDirOverride || envDir || "~/.memo");
   const configPath = path.join(initialDir, "config.toml");
   if (!(await pathExists(configPath))) {
     return { ...defaultConfig(initialDir), data_dir: initialDir };
   }
-  const parsed = toml.parse(await readFile(configPath, "utf8")) as Partial<MomoConfig>;
+  const parsed = toml.parse(await readFile(configPath, "utf8")) as Partial<MemoConfig>;
   const merged = defaultConfig(initialDir);
   return {
     data_dir: resolvePath(dataDirOverride || envDir || parsed.data_dir || merged.data_dir),

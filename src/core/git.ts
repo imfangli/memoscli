@@ -29,7 +29,7 @@ export async function gitRm(dataDir: string, relativePath: string): Promise<void
 export async function gitCommit(dataDir: string, message: string): Promise<void> {
   await run(
     "git",
-    ["-c", "user.name=momo", "-c", "user.email=momo@example.invalid", "commit", "-m", message],
+    ["-c", "user.name=memo", "-c", "user.email=memo@example.invalid", "commit", "-m", message],
     { cwd: dataDir },
   );
 }

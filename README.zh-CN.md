@@ -58,13 +58,13 @@ memo --data-dir ~/notes/memo a "写到另一个 memo 仓库"
 也可以通过环境变量指定：
 
 ```bash
-MOMO_DIR=~/notes/memo memo ls
+MEMO_DIR=~/notes/memo memo ls
 ```
 
 ## 核心概念
 
-- 默认数据目录是 `~/.momo/`。
-- 每条 memo 都是一个 Markdown 文件，默认保存到 `~/.momo/memos/YYYY/MM/DD/`。
+- 默认数据目录是 `~/.memo/`。
+- 每条 memo 都是一个 Markdown 文件，默认保存到 `~/.memo/memos/YYYY/MM/DD/`。
 - `memo add`、`memo edit`、`memo delete` 会为变更创建本地 Git commit。
 - `config.toml` 是每台机器的本地配置，不会进入 memo 数据仓库，因为它可能包含本地路径、Webhook URL 或 secret。
 - 搜索优先使用 `rg`，没有安装时回退到 `grep`。
@@ -73,7 +73,7 @@ MOMO_DIR=~/notes/memo memo ls
 默认目录结构：
 
 ```text
-~/.momo/
+~/.memo/
 ├── memos/
 ├── assets/
 ├── events/
@@ -133,13 +133,13 @@ memo rm --select
 
 ## 多设备同步
 
-每次 memo 变更都会创建本地 Git commit。你可以把 `~/.momo/` 当成一个普通 Git 仓库来连接 GitHub、GitLab 或自建 Git 服务。
+每次 memo 变更都会创建本地 Git commit。你可以把 `~/.memo/` 当成一个普通 Git 仓库来连接 GitHub、GitLab 或自建 Git 服务。
 
 第一台电脑：
 
 ```bash
 memo init
-git -C ~/.momo remote add origin git@github.com:user/memos.git
+git -C ~/.memo remote add origin git@github.com:user/memos.git
 memo sync
 ```
 
@@ -179,7 +179,7 @@ Git: sync started in background. Log: .git/memo-sync.log
 查看后台同步日志：
 
 ```bash
-tail -f ~/.momo/.git/memo-sync.log
+tail -f ~/.memo/.git/memo-sync.log
 ```
 
 ## 配置说明
@@ -187,13 +187,13 @@ tail -f ~/.momo/.git/memo-sync.log
 打开配置文件：
 
 ```bash
-$EDITOR ~/.momo/config.toml
+$EDITOR ~/.memo/config.toml
 ```
 
 默认配置结构：
 
 ```toml
-data_dir = "/Users/you/.momo"
+data_dir = "/Users/you/.memo"
 
 [git]
 auto_commit = true
@@ -222,7 +222,7 @@ secret = ""
 
 ## Webhook
 
-在 `~/.momo/config.toml` 里配置 endpoint：
+在 `~/.memo/config.toml` 里配置 endpoint：
 
 ```toml
 [webhook]
@@ -251,8 +251,8 @@ memo wh t n8n    # 向 n8n 发送测试事件
 如果设置了 `webhook.secret`，请求会带上签名头：
 
 ```text
-x-momo-timestamp
-x-momo-signature: sha256=<hmac>
+x-memo-timestamp
+x-memo-signature: sha256=<hmac>
 ```
 
 Webhook 队列文件属于运行时状态，不会进入 Git。
@@ -366,8 +366,8 @@ git ls-remote git@github.com:user/memos.git
 查看日志和 Git 状态：
 
 ```bash
-tail -n 80 ~/.momo/.git/memo-sync.log
-git -C ~/.momo status --short --branch
+tail -n 80 ~/.memo/.git/memo-sync.log
+git -C ~/.memo status --short --branch
 ```
 
 ### 没有安装 `rg` 或 `fzf`

@@ -1,6 +1,6 @@
 import { mkdir, readFile, rename, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { MemoWebhookEvent, MomoConfig } from "../types.js";
+import { MemoWebhookEvent, MemoConfig } from "../types.js";
 import { ensureDir, pathExists } from "../utils/fs.js";
 import { hmacSha256, randomHex, sha256File } from "../utils/hash.js";
 import { localIso } from "../utils/time.js";
@@ -61,7 +61,7 @@ async function generateEventsFromStatuses(dataDir: string, rows: string[], delet
       event_id: `evt_${memo.meta.id.replace("-", "_")}_${randomHex(2)}`,
       event,
       occurred_at: localIso(),
-      source: "momo-cli",
+      source: "memo-cli",
       sync_mode: status === "D" ? undefined : "replace",
       memo: { ...memo.meta, content: memo.content },
       file: {
@@ -82,7 +82,7 @@ export async function countEvents(dataDir: string, queue: "pending" | "sent" | "
   return (await readdir(dir)).filter((file) => file.endsWith(".json")).length;
 }
 
-export async function flushQueue(dataDir: string, config: MomoConfig, source: "pending" | "failed" = "pending"): Promise<{ sent: number; failed: number }> {
+export async function flushQueue(dataDir: string, config: MemoConfig, source: "pending" | "failed" = "pending"): Promise<{ sent: number; failed: number }> {
   await ensureEventDirs(dataDir);
   const dir = eventsDir(dataDir, source);
   const files = (await readdir(dir)).filter((file) => file.endsWith(".json"));
@@ -101,7 +101,7 @@ export async function flushQueue(dataDir: string, config: MomoConfig, source: "p
   return { sent, failed };
 }
 
-export async function sendEvent(config: MomoConfig, event: MemoWebhookEvent): Promise<boolean> {
+export async function sendEvent(config: MemoConfig, event: MemoWebhookEvent): Promise<boolean> {
   if (!config.webhook.enabled) return true;
   const endpoints = config.webhook.endpoints.filter(
     (endpoint) => endpoint.enabled && endpoint.events.includes(event.event),
@@ -111,8 +111,8 @@ export async function sendEvent(config: MomoConfig, event: MemoWebhookEvent): Pr
   const timestamp = String(Math.floor(Date.now() / 1000));
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (config.webhook.secret) {
-    headers["x-momo-timestamp"] = timestamp;
-    headers["x-momo-signature"] = `sha256=${hmacSha256(config.webhook.secret, body, timestamp)}`;
+    headers["x-memo-timestamp"] = timestamp;
+    headers["x-memo-signature"] = `sha256=${hmacSha256(config.webhook.secret, body, timestamp)}`;
   }
   const timeout = Math.max(1, config.webhook.timeout_seconds) * 1000;
   const results = await Promise.all(
@@ -137,7 +137,7 @@ export async function createTestEvent(name: string): Promise<MemoWebhookEvent> {
     event_id: `evt_test_${Date.now()}_${randomHex(2)}`,
     event: "webhook.test",
     occurred_at: localIso(),
-    source: "momo-cli",
+    source: "memo-cli",
     memo: { id: "test", content: `Webhook test for ${name}`, created_at: localIso(), updated_at: localIso(), tags: [] },
   };
 }

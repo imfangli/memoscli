@@ -13,7 +13,7 @@ Local-first Markdown memo CLI backed by Git and webhooks.
 ## Features
 
 - Local-first storage in Markdown files
-- One memo per file under `~/.momo/memos/YYYY/MM/DD/`
+- One memo per file under `~/.memo/memos/YYYY/MM/DD/`
 - Git commit for each add/edit/delete
 - Optional background Git sync
 - Safe edit mode that edits only the memo body
@@ -142,7 +142,7 @@ pnpm dev init /tmp/memo-demo
 Default data directory:
 
 ```text
-~/.momo/
+~/.memo/
 ├── memos/
 ├── assets/
 ├── events/
@@ -177,13 +177,13 @@ Today I thought about a local-first memo tool.
 Open:
 
 ```bash
-$EDITOR ~/.momo/config.toml
+$EDITOR ~/.memo/config.toml
 ```
 
 Default shape:
 
 ```toml
-data_dir = "/Users/you/.momo"
+data_dir = "/Users/you/.memo"
 
 [git]
 auto_commit = true
@@ -211,7 +211,7 @@ memo --data-dir ~/notes/memo a "Write somewhere else"
 Or by environment variable:
 
 ```bash
-MOMO_DIR=~/notes/memo memo ls
+MEMO_DIR=~/notes/memo memo ls
 ```
 
 ## Git Sync
@@ -222,7 +222,7 @@ On the first computer, initialize a data directory, add an `origin` remote, then
 
 ```bash
 memo init
-git -C ~/.momo remote add origin git@github.com:user/memos.git
+git -C ~/.memo remote add origin git@github.com:user/memos.git
 memo sync
 ```
 
@@ -257,12 +257,12 @@ Git: sync started in background. Log: .git/memo-sync.log
 Check the log inside the memo data repository:
 
 ```bash
-tail -f ~/.momo/.git/memo-sync.log
+tail -f ~/.memo/.git/memo-sync.log
 ```
 
 ## Webhooks
 
-Configure endpoints in `~/.momo/config.toml`:
+Configure endpoints in `~/.memo/config.toml`:
 
 ```toml
 [webhook]
@@ -291,8 +291,8 @@ memo wh t n8n    # send test event
 If `webhook.secret` is set, requests include:
 
 ```text
-x-momo-timestamp
-x-momo-signature: sha256=<hmac>
+x-memo-timestamp
+x-memo-signature: sha256=<hmac>
 ```
 
 Webhook queue files are runtime state and are ignored by Git.
@@ -413,8 +413,8 @@ Make sure the remote is the memo data repository, not the `memoscli` source code
 Check:
 
 ```bash
-tail -n 80 ~/.momo/.git/memo-sync.log
-git -C ~/.momo status --short --branch
+tail -n 80 ~/.memo/.git/memo-sync.log
+git -C ~/.memo status --short --branch
 ```
 
 ### `rg` or `fzf` is missing

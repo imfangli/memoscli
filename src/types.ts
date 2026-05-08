@@ -19,7 +19,7 @@ export interface WebhookEndpoint {
   events: string[];
 }
 
-export interface MomoConfig {
+export interface MemoConfig {
   data_dir: string;
   git: {
     auto_commit: boolean;
@@ -53,7 +53,7 @@ export interface MemoWebhookEvent {
   event_id: string;
   event: MemoEventName;
   occurred_at: string;
-  source: "momo-cli";
+  source: "memo-cli";
   sync_mode?: "replace";
   memo?: MemoMetadata & { content: string };
   file?: {

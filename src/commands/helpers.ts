@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { MemoRecord, MomoConfig } from "../types.js";
+import { MemoRecord, MemoConfig } from "../types.js";
 import { loadConfig } from "../core/config.js";
 import { displayDateTime } from "../utils/time.js";
 import { summarize } from "../core/storage.js";
@@ -25,7 +25,7 @@ export function printMemo(memo: MemoRecord): void {
   console.log(memo.content);
 }
 
-export async function autoSyncMessage(config: MomoConfig): Promise<string> {
+export async function autoSyncMessage(config: MemoConfig): Promise<string> {
   if (!config.git.auto_push) return "";
   try {
     return `\n${(await gitSyncInBackground(config.data_dir)).message}`;

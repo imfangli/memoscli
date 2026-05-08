@@ -9,7 +9,7 @@ function result(): SearchResult {
   return {
     relativePath: "memos/2026/05/05/151128-2253.md",
     memo: {
-      filePath: "/home/user/.momo/memos/2026/05/05/151128-2253.md",
+      filePath: "/home/user/.memo/memos/2026/05/05/151128-2253.md",
       relativePath: "memos/2026/05/05/151128-2253.md",
       content: "翻译一句话\n基础插画",
       meta: {

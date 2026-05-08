@@ -12,7 +12,7 @@ export function resolveEditor(): string {
 }
 
 export async function editText(initial: string, suffix = ".md"): Promise<string> {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "momo-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "memo-"));
   const filePath = path.join(dir, `memo${suffix}`);
   await writeFile(filePath, initial, "utf8");
   try {

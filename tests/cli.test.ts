@@ -128,7 +128,7 @@ describe("cli", () => {
   });
 
   it("initializes, adds, lists, shows, and deletes a memo", () => {
-    const dir = mkdtempSync(path.join(os.tmpdir(), "momo-test-"));
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-test-"));
     run(["init", dir]);
     const addOutput = run(["--data-dir", dir, "add", "hello from test #idea"]);
     const id = addOutput.match(/Added memo: (\S+)/)?.[1];
@@ -167,7 +167,7 @@ describe("cli", () => {
   });
 
   it("creates pending events when auto_send is disabled", () => {
-    const dir = mkdtempSync(path.join(os.tmpdir(), "momo-events-"));
+    const dir = mkdtempSync(path.join(os.tmpdir(), "memo-events-"));
     run(["init", dir]);
     const configPath = path.join(dir, "config.toml");
     const config = readFileSync(configPath, "utf8").replace("auto_send = true", "auto_send = false");

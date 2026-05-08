@@ -25,7 +25,7 @@ export function registerInit(program: Command): void {
   program
     .command("init")
     .alias("i")
-    .argument("[dir]", "data directory", "~/.momo")
+    .argument("[dir]", "data directory", "~/.memo")
     .option("--from <repo>", "clone an existing memo data repository")
     .description("Initialize a memo data directory")
     .action(async (dir: string, options: { from?: string }) => {
